@@ -1,0 +1,87 @@
+{% extends "healthtracker/base.html" %}
+
+{% load static %}
+{% load reading_extras %}
+{% load humanize %}
+
+{% block scripts %}
+    <script type="module">
+        $(document).ready(() => {
+                const weight_data = [
+                    {% for d in data.weight reversed %}
+                        {% templatetag openbrace %}
+                        x: {{ d.time.time|date:'U' }}000,
+                        y: {{ d.value }}
+                        {% templatetag closebrace %},
+                    {% endfor %}
+            ]
+
+                const fat_data = [
+                    {% for d in data.bodyfat reversed %}
+                        {% templatetag openbrace %}
+                        x: {{ d.time.time|date:'U' }}000,
+                        y: {{ d|weight_part }}
+                        {% templatetag closebrace %},
+                    {% endfor %}
+            ]
+
+                const muscle_data = [
+                    {% for d in data.musclemass reversed %}
+                        {% templatetag openbrace %}
+                        x: {{ d.time.time|date:'U' }}000,
+                        y: {{ d.value }}
+                        {% templatetag closebrace %},
+                    {% endfor %}
+            ]
+
+                generate_masses_chart('#masses_chart', weight_data, fat_data, muscle_data)
+            }
+        )
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <a class="btn btn-primary" href="{% url 'htracker:multi-reading-add' %}">Insert readings</a>
+                        <a class="btn btn-primary" href="{% url 'htracker:individual-edit' %}">Edit data</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if data.weight|length > 0 %}
+            <div class="row my-3">
+                <div class="col">
+                    {% include "healthtracker/cards/latest.html" %}
+                </div>
+                <div class="col">
+                    {% include "healthtracker/cards/overview.html" %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row my-3">
+            <div class="col-12">
+                {% include "healthtracker/cards/time_table.html" %}
+            </div>
+        </div>
+
+        {% if data.weight|length > 0 %}
+            <div class="row my-3">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                            Weight breakdown chart
+                        </div>
+                        <div class="card-body">
+                            <canvas id="masses_chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

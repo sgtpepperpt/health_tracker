@@ -1,0 +1,17 @@
+{% load static %}
+{% load reading_extras %}
+{% load humanize %}
+
+<div class="card h-100">
+    <div class="card-header">
+        Latest
+    </div>
+    <div class="card-body">
+        {% for k, v in overview.last.items %}
+            <p class="text-left">
+                <b>{{ v|name }}</b>: {{ v.value }}{{ v|unit }}
+                ({{ v.time.time|naturaltime }})
+            </p>
+        {% endfor %}
+    </div>
+</div>

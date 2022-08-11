@@ -1,0 +1,51 @@
+{% extends "healthtracker/base.html" %}
+
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+{% load reading_extras %}
+
+{% block scripts %}
+    <script>
+        const toggle_status = (param, status) => {
+            document.getElementById(`id_lower_${param}_danger`).readOnly = status
+            document.getElementById(`id_lower_${param}_ok`).readOnly = status
+            document.getElementById(`id_upper_${param}_ok`).readOnly = status
+            document.getElementById(`id_upper_${param}_danger`).readOnly = status
+        }
+
+        const init_status = (param) => {
+            const check = document.getElementById(`id_status_${param}`)
+            toggle_status(param, !check.checked)
+            check.onchange = e => toggle_status(param, !e.target.checked)
+        }
+
+        $(document).ready(() => {
+            {{ dynamic_params|safe }}.
+            forEach(p => init_status(p))
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row my-2">
+            <div class="col">
+                <form method="post">
+                {% csrf_token %}
+                    {{ form|crispy }}
+
+                    <div class="row">
+                    {% for k, checker_form in forms.items %}
+                        <div class="col-6">
+                            <hr/>
+                            <h3>{{ k }}</h3>
+                            {{ checker_form|crispy }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

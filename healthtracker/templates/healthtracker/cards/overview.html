@@ -1,0 +1,19 @@
+{% load static %}
+{% load reading_extras %}
+{% load humanize %}
+
+<div class="card h-100">
+    <div class="card-header">
+        Overview
+    </div>
+    <div class="card-body">
+        {% if overview.projected_end %}
+            <p class="text-left">
+                <b>Estimated end</b>: {{ overview.projected_end|date:'d/m/Y' }} ({{ overview.projected_end|naturaltime }})
+            </p>
+        {% endif %}
+        <p class="text-left">
+            <b>Goal delta</b>: {{ overview.goal_delta }}kg
+        </p>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+{% extends "healthtracker/base.html" %}
+
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% load reading_extras %}
+
+{% block scripts %}
+    <script>
+        let calendar = null
+        let clock = null
+        $(document).ready(() => {
+            const start_date = new Date('{{ form.time.value|date:'c' }}')
+
+            const limit = new Date()
+            limit.setUTCDate(start_date.getUTCDate() + 1)
+
+            const confs = {
+                restrictions: {
+                    maxDate: limit
+                },
+                display: {
+                    components: {
+                        useTwentyfourHour: true
+                    },
+                    icons: {
+                        time: 'bi-clock',
+                        date: 'bi-calendar',
+                        up: 'bi-arrow-up',
+                        down: 'bi-arrow-down',
+                        next: 'bi-chevron-right',
+                        previous: 'bi-chevron-left',
+                        today: 'bi-calendar-check',
+                        clear: 'bi-trash',
+                        close: 'bi-x'
+                    },
+                    buttons: {
+                        today: true,
+                        close: true
+                    }
+                },
+                allowInputToggle: true
+            }
+
+            const calendar_config = {
+                display: {
+                    viewMode: 'calendar',
+                    components: {
+                        decades: true,
+                        year: true,
+                        month: true,
+                        date: true,
+                        hours: false,
+                        minutes: false,
+                        seconds: false
+                    }
+                }
+            }
+
+            const clock_config = {
+                display: {
+                    viewMode: 'clock',
+                    components: {
+                        decades: false,
+                        year: false,
+                        month: false,
+                        date: false,
+                        hours: true,
+                        minutes: true,
+                        seconds: false
+                    }
+                }
+            }
+
+            calendar = new tempusDominus.TempusDominus(document.getElementById('datepicker'), _.merge([calendar_config], [confs])[0])
+            clock = new tempusDominus.TempusDominus(document.getElementById('timepicker'), _.merge([clock_config], [confs])[0])
+
+            // link
+            clock.subscribe(tempusDominus.Namespace.events.change, (e) => {
+                if (e.date.getTime() !== calendar.viewDate.getTime()) // prevent recursion with the other event
+                    calendar.dates.setValue(e.date)
+
+                // set hidden field
+                document.getElementById('time_input').value = e.date.toISOString()
+            })
+
+            calendar.subscribe(tempusDominus.Namespace.events.change, (e) => {
+                if (e.date.getTime() !== clock.viewDate.getTime()) // prevent recursion with the other event
+                    clock.dates.setValue(e.date)
+
+                // set hidden field
+                document.getElementById('time_input').value = e.date.toISOString()
+            })
+
+            calendar.dates.setValue(tempusDominus.DateTime.convert(start_date))
+            clock.dates.setValue(tempusDominus.DateTime.convert(start_date))
+
+            {%  if not update %}
+                changeNowStatus(true)
+            {% endif %}
+        })
+
+        let interval = null
+        const changeNowStatus = (checked) => {
+            if (checked) {
+                interval = setInterval(() => {
+                    const now = new Date()
+                    calendar.dates.setValue(tempusDominus.DateTime.convert(now))
+                    clock.dates.setValue(tempusDominus.DateTime.convert(now))
+                    calendar.disable()
+                    clock.disable()
+                }, 100)
+            } else {
+                clearInterval(interval)
+                interval = null
+                calendar.enable()
+                clock.enable()
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row my-2">
+            <div class="col">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <fieldset class="{{ form.time.errors|yesno:'is-invalid,,' }}">
+                        <h3 class="form-label">Reading date and time</h3>
+                        <input id="time_input" type="hidden" name="time"/>
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="input-group" id="datepicker" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                    <input id="datepickerInput" type="text" class="form-control {{ form.time.errors|yesno:'is-invalid,,' }}" data-td-target="#datepicker" aria-label='Reading date'/>
+                                    <span class="input-group-text" data-td-target="#datepicker" data-td-toggle="datetimepicker">
+                                        <span class="bi-calendar3"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group" id="timepicker" data-td-target-input="nearest" data-td-target-toggle="nearest">
+                                    <input id="timepickerInput" type="text" class="form-control {{ form.time.errors|yesno:'is-invalid,,' }}" data-td-target="#timepicker" aria-label='Reading time'/>
+                                    <span class="input-group-text" data-td-target="#timepicker" data-td-toggle="datetimepicker">
+                                        <span class="bi-clock"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            {% if not update %}
+                                <div class="col-3">
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="nowCheck" onchange="changeNowStatus(this.checked)" checked>
+                                        <label class="form-check-label" for="nowCheck">Now?</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+
+                    {% for error in form.time.errors %}
+                        <span class="invalid-feedback">
+                            <strong>{{ error }}</strong>
+                        </span>
+                    {% endfor %}
+
+                    <div class="row">
+                        {% for key, reading_form in forms.items %}
+                            <div class="col-6">
+                                <hr/>
+                                <h3 class="form-label">
+                                    {{ reading_form.0 }}
+                                    {% if reading_form.1.instance.unit %}
+                                        <span>({{ reading_form.1.instance.unit }})</span>
+                                    {% endif %}
+                                </h3>
+
+                                {{ reading_form.1.value|as_crispy_field }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% load reading_extras %}
+
+<div class="card">
+    <div class="card-header">
+        Readings
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Date</th>
+                {% for t in used_readings %}
+                    <th scope="col" class="text-left">{{ t }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for line in time_data %}
+                <tr>
+                    <th scope="row">{{ line.time.time|date:'d/m/Y H:i' }}</th>
+                    {% for reading in used_readings %}
+                        {% with data=line.values|get:reading %}
+                            <td>
+                                {% if data %}
+                                    <span class="text-{{ data|status }}">
+                                        {{ data|value }}{{ data|unit }}
+                                    </span>
+                                    {% if data|weight_part %}
+                                        ({{ data|weight_part }}kg)
+                                    {% endif %}
+                                {% else %}
+                                    <span>
+                                        -
+                                    </span>
+                                {% endif %}
+                            </td>
+                        {% endwith %}
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <p></p>
+                <th scope="row" colspan="11" class="text-center">No readings are available.</th>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
