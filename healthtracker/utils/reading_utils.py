@@ -1,3 +1,4 @@
+from healthtracker.readings.blood import Glucose, Creatinine
 from healthtracker.readings.body import Height, Weight, BodyFat, BodyWater, MuscleMass, FitnessLevel, BoneMass, \
     BasalMetabolicRate, VisceralFatLevel, Waist, HeightForm, WeightForm, BodyFatForm, BodyWaterForm, MuscleMassForm, \
     FitnessLevelForm, BoneMassForm, BasalMetabolicRateForm, VisceralFatLevelForm, WaistForm, WeightChecker, \
@@ -7,12 +8,24 @@ from healthtracker.readings.body import Height, Weight, BodyFat, BodyWater, Musc
     WaistChecker, WaistCheckerForm, BMI, BMIChecker, BMICheckerForm
 
 
-def get_readings():
-    return [Height, Weight, BodyFat, BodyWater, MuscleMass, FitnessLevel, BoneMass, BasalMetabolicRate, VisceralFatLevel, Waist]
+_READINGS = {
+    'body': [Height, Weight, BodyFat, BodyWater, MuscleMass, FitnessLevel, BoneMass, BasalMetabolicRate, VisceralFatLevel, Waist],
+    'blood': [Glucose, Creatinine]
+}
 
 
-def get_derived_readings():
-    return [BMI]
+_DERIVED_READINGS = {
+    'body': [BMI],
+    'blood': []
+}
+
+
+def get_readings(category='body'):
+    return _READINGS[category]
+
+
+def get_derived_readings(category='body'):
+    return _DERIVED_READINGS[category]
 
 
 def get_cls(name):
