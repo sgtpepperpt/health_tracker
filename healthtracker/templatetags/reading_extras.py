@@ -8,7 +8,7 @@ register = template.Library()
 @register.filter
 def status(reading):
     if hasattr(type(reading), 'checker'):
-        return type(reading).checker.get_status(reading, reading.value)
+        return type(reading).checker.get_status(reading.value)
 
     return ''
 

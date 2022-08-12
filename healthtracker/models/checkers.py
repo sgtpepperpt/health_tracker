@@ -9,7 +9,7 @@ class _BaseChecker(SingletonModel):
     class Meta:
         abstract = True
 
-    def get_status(self, cls, value):
+    def get_status(self, value):
         pass
 
 
@@ -22,14 +22,14 @@ class RangeChecker(_BaseChecker):
     class Meta:
         abstract = True
 
-    def get_status(self, cls, value):
-        c = cls.checker.load()
-        if not c.active or not (c.lower_danger and c.lower_ok and c.upper_ok and c.upper_danger):
+    def get_status(self, value):
+        checker = self.load()
+        if not checker.active or not (checker.lower_danger and checker.lower_ok and checker.upper_ok and checker.upper_danger):
             # TODO might accept some combinations (eg ok or danger only)
             return None
 
-        return 'success' if c.lower_ok <= value <= c.upper_ok \
-            else 'warning' if c.lower_danger <= value <= c.upper_danger \
+        return 'success' if checker.lower_ok <= value <= checker.upper_ok \
+            else 'warning' if checker.lower_danger <= value <= checker.upper_danger \
             else 'danger'
 
 
@@ -40,13 +40,13 @@ class ListChecker(_BaseChecker):
     class Meta:
         abstract = True
 
-    def get_status(self, cls, value):
-        c = cls.checker.load()
-        if not c.active or not c.ok_values or not c.warning_values:
+    def get_status(self, value):
+        checker = self.load()
+        if not checker.active or not checker.ok_values or not checker.warning_values:
             return None
 
-        ok_list = c.ok_values.split(',')
-        warning_list = c.warning_values.split(',')
+        ok_list = checker.ok_values.split(',')
+        warning_list = checker.warning_values.split(',')
 
         return 'success' if str(value) in ok_list \
             else 'warning' if str(value) in warning_list \
