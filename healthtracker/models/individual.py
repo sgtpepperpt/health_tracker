@@ -8,7 +8,7 @@ from healthtracker.models.models import SingletonModel
 
 class Individual(SingletonModel):
     goal = models.FloatField(blank=True, null=True)
-    days_left = models.IntegerField(blank=True, null=True)
+    goal_deadline = models.DateTimeField(blank=True, null=True)
 
 
 class IndividualForm(forms.ModelForm):
@@ -26,7 +26,7 @@ class IndividualForm(forms.ModelForm):
         self.helper.layout.append(
             Row(
                 Column('goal'),
-                Column('days_left')
+                Column('goal_deadline')
             )
         )
         self.helper.layout.append(HTML('<hr/>'))

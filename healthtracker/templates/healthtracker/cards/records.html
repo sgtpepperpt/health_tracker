@@ -1,0 +1,14 @@
+{% load static %}
+{% load reading_extras %}
+{% load humanize %}
+
+<div class="card h-100">
+    <div class="card-header">
+        Records
+    </div>
+    <div class="card-body">
+        <p class="text-left">
+            <b>Closest weight to goal</b>: {{ records.weight.value }}kg ({{ records.weight.time.time|naturaltime }})
+        </p>
+    </div>
+</div>

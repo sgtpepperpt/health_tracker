@@ -20,7 +20,7 @@
                     {% for d in data.bodyfat reversed %}
                         {% templatetag openbrace %}
                         x: {{ d.time.time|date:'U' }}000,
-                        y: {{ d|weight_part }}
+                        y: {{ d|mass_part }}
                         {% templatetag closebrace %},
                     {% endfor %}
             ]
@@ -58,7 +58,16 @@
                     {% include "healthtracker/cards/latest.html" %}
                 </div>
                 <div class="col">
-                    {% include "healthtracker/cards/overview.html" %}
+                    <div class="row mb-2">
+                        <div class="col">
+                            {% include "healthtracker/cards/overview.html" %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {% include "healthtracker/cards/records.html" %}
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endif %}

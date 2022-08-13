@@ -25,8 +25,11 @@
                                     <span class="text-{{ data|status }}">
                                         {{ data|value }}{{ data|unit }}
                                     </span>
-                                    {% if data|weight_part %}
-                                        ({{ data|weight_part }}kg)
+                                    {% if data|mass_part %}
+                                        ({{ data|mass_part }}kg)
+                                    {% endif %}
+                                    {% if data|rate_part %}
+                                        ({{ data|rate_part }}%)
                                     {% endif %}
                                 {% else %}
                                     <span>

@@ -1,6 +1,6 @@
 from django import template
 
-from healthtracker.readings.body import WeightDependantReading
+from healthtracker.readings.body import WeightRateToMass, WeightMassToRate
 
 register = template.Library()
 
@@ -8,7 +8,7 @@ register = template.Library()
 @register.filter
 def status(reading):
     if hasattr(type(reading), 'checker'):
-        return type(reading).checker.get_status(reading.value)
+        return type(reading).checker.get_status(reading)
 
     return ''
 
@@ -29,9 +29,16 @@ def name(reading):
 
 
 @register.filter
-def weight_part(reading):
-    if isinstance(reading, WeightDependantReading):
+def mass_part(reading):
+    if isinstance(reading, WeightRateToMass):
         return reading.as_mass()
+    return None
+
+
+@register.filter
+def rate_part(reading):
+    if isinstance(reading, WeightMassToRate):
+        return reading.as_rate()
     return None
 
 

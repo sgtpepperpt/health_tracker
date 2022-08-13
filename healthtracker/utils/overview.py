@@ -1,6 +1,7 @@
 import datetime
 import time
 
+from django.db.models import Max
 from scipy import stats
 
 from healthtracker.models.individual import Individual
@@ -36,3 +37,13 @@ def generate_overview():
     overview['last'] = {m.get_internal_name(): m.objects.order_by('time__time').last() for m in get_readings() if m.objects.count() > 0}
 
     return overview
+
+
+def generate_records():
+    records = {}
+
+    wants_to_lose = Weight.objects.order_by('time__time').last().value >= Individual.load().goal
+
+    records['weight'] = Weight.objects.order_by('value').first() if wants_to_lose else Weight.objects.order_by('value').last()
+
+    return records

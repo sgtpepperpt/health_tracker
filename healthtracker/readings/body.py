@@ -6,13 +6,22 @@ from healthtracker.models.readings import FloatReading, RateReading, IntReading,
     get_closest
 
 
-class WeightDependantReading(RateReading):
+class WeightRateToMass(RateReading):
     class Meta:
         abstract = True
 
     def as_mass(self):
         weight = get_closest(Weight, self.time.time, False)
         return round(weight.value * self.value / 100, 1) if weight else None
+
+
+class WeightMassToRate(FloatReading):
+    class Meta:
+        abstract = True
+
+    def as_rate(self):
+        weight = get_closest(Weight, self.time.time, False)
+        return round(self.value / weight.value * 100, 1) if weight else None
 
 
 ########################################################################################################################
@@ -64,7 +73,7 @@ class BodyFatCheckerForm(RangeCheckerForm):
         fields = '__all__'
 
 
-class BodyFat(WeightDependantReading):
+class BodyFat(WeightRateToMass):
     checker = BodyFatChecker()
     name = 'Body Fat'
     short_name = 'Fat %'
@@ -87,7 +96,7 @@ class BodyWaterCheckerForm(RangeCheckerForm):
         fields = '__all__'
 
 
-class BodyWater(WeightDependantReading):
+class BodyWater(WeightRateToMass):
     checker = BodyWaterChecker()
     name = 'Body Water'
     short_name = 'Water %'
@@ -101,7 +110,14 @@ class BodyWaterForm(UnlabeledForm):
 
 ########################################################################################################################
 class MuscleMassChecker(RangeChecker):
-    pass
+    def get_status(self, reading):
+        # status is calculated as percentage of weight
+        timestamp = reading.time.time
+        value = reading.value
+
+        weight = get_closest(Weight, timestamp, False)
+
+        return super(MuscleMassChecker, self).get_status(DerivedReading(None, value / weight.value * 100))
 
 
 class MuscleMassCheckerForm(RangeCheckerForm):
@@ -110,7 +126,7 @@ class MuscleMassCheckerForm(RangeCheckerForm):
         fields = '__all__'
 
 
-class MuscleMass(FloatReading):
+class MuscleMass(WeightMassToRate):
     checker = MuscleMassChecker()
     name = 'Muscle mass'
     short_name = 'Muscle'

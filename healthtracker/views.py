@@ -9,7 +9,7 @@ from healthtracker.models.individual import IndividualForm, Individual
 from healthtracker.models.readings import get_closest
 from healthtracker.models.timestamp import TimestampForm, Timestamp
 from healthtracker.readings.body import Weight, Height, BodyFat, BodyWater, BMI, MuscleMass, BoneMass
-from healthtracker.utils.overview import generate_overview
+from healthtracker.utils.overview import generate_overview, generate_records
 from healthtracker.utils.reading_utils import get_object, \
     reading_cls_to_form_cls, status_cls_to_form_cls, get_readings, get_derived_readings
 
@@ -97,6 +97,7 @@ class IndexView(generic.TemplateView):
                 line['values'][m.get_short_name()] = m
 
         context['overview'] = generate_overview()
+        context['records'] = generate_records()
         context['used_readings'] = order_data(used_readings)
 
         context['data'] = {
