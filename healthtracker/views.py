@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.defaulttags import register
@@ -21,7 +23,7 @@ def individual_data():
     }
 
 
-def timestamp_data(t):
+def timestamp_readings(t):
     associated_readings = [getattr(t, f'{m.get_internal_name()}_set').all() for m in get_readings()]
     return [m.first() for m in associated_readings if m.count() > 0]
 
@@ -31,7 +33,7 @@ def get_interesting_timestamps(*wanted_readings):
 
     for t in Timestamp.objects.order_by('time').all():
         # check which readings where input at the timestamp
-        available_readings = timestamp_data(t)
+        available_readings = timestamp_readings(t)
 
         for a in available_readings:
             if type(a) in (wanted_readings or get_readings()):
@@ -77,7 +79,7 @@ class IndexView(generic.TemplateView):
         used_readings = set()
         for t in Timestamp.objects.order_by('time').all():
             # check which readings where input at the timestamp
-            available_readings = timestamp_data(t)
+            available_readings = timestamp_readings(t)
             derived_readings = [m for m in bmi if m.time == t]
 
             # if there are no readings for this time don't do anything (e.g. like adding a line)
@@ -186,7 +188,62 @@ class MultipleReadingsAdd(generic.TemplateView):
         return HttpResponseRedirect(reverse('htracker:index'))
 
 
+class MultipleReadingsUpdate(generic.TemplateView):
+    """
+    Update readings associated with a timestamp (including the timestamp, if wanted)
+    """
+    template_name = 'healthtracker/reading_form.html'
+
+    def get(self, request, *args, **kwargs):
+        # TODO
+        return render(request, self.template_name, {
+            'form': TimestampForm(),
+            'forms': {},
+            'update': True
+        })
+
+    def post(self, request, *args, **kwargs):
+        # TODO
+
+        # t = Timestamp.objects.all()
+        # t = t.get(pk=65)
+        # t.time += timedelta(hours=3)
+        # t.save()
+
+        return render(request, self.template_name, {
+            'form': TimestampForm(),
+            'forms': {},
+            'update': True
+        })
+
+
+class MultipleReadingsDelete(generic.TemplateView):
+    """
+    Delete all readings associated with a timestamp
+    """
+    template_name = 'healthtracker/reading_form.html'
+
+    def get(self, request, *args, **kwargs):
+        timestamp = Timestamp.objects.get(pk=kwargs['pk'])
+
+        # TODO confirmation
+        return render(request, self.template_name, {})
+
+    def post(self, request, *args, **kwargs):
+        timestamp = Timestamp.objects.get(pk=kwargs['pk'])
+        # TODO
+        # for obj in timestamp_readings(timestamp):
+        #     obj.delete()
+        #
+        # timestamp.delete()
+
+        return HttpResponseRedirect(reverse('htracker:index'))
+
+
 class SingleReadingUpdate(generic.TemplateView):
+    """
+    Update a single reading
+    """
     template_name = 'healthtracker/reading_form.html'
 
     def get(self, request, *args, **kwargs):
@@ -223,12 +280,17 @@ class SingleReadingUpdate(generic.TemplateView):
                 'update': True
             })
 
-        # TODO save timestamp form?
+        # do not save timestamp, as it may be associated with other readings
+        # that we're not seeing here
         form.save()
         return HttpResponseRedirect(reverse('htracker:index'))
 
 
 class SingleReadingDelete(generic.TemplateView):
+    """
+    Delete a reading, and its timestamp, should the latter
+    only be associated with the deleted reading
+    """
     template_name = 'healthtracker/reading_form.html'
 
     def get(self, request, *args, **kwargs):

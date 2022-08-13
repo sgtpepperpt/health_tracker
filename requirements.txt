@@ -1,4 +1,5 @@
-Django
-django-crispy-forms
+Django~=4.1
+django-crispy-forms~=1.14.0
 crispy-bootstrap5
-scipy
+scipy~=1.9.0
+python-decouple
