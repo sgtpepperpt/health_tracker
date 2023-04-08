@@ -12,8 +12,10 @@
                 <b>Estimated end</b>: {{ overview.projected_end|date:'d/m/Y' }} ({{ overview.projected_end|naturaltime }})
             </p>
         {% endif %}
+        {% if overview.goal_delta %}
         <p class="text-left">
             <b>Goal delta</b>: {{ overview.goal_delta|floatformat }}kg
         </p>
+        {% endif %}
     </div>
 </div>

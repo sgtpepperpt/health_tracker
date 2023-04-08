@@ -8,7 +8,9 @@
     </div>
     <div class="card-body">
         <p class="text-left">
-            <b>Closest weight to goal</b>: {{ records.weight.value }}kg ({{ records.weight.time.time|naturaltime }})
+            {% if records.weight %}
+                <b>Closest weight to goal</b>: {{ records.weight.value }}kg ({{ records.weight.time.time|naturaltime }})
+            {% endif %}
         </p>
     </div>
 </div>

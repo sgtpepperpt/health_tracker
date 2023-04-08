@@ -42,8 +42,8 @@ def generate_overview():
 def generate_records():
     records = {}
 
-    wants_to_lose = Weight.objects.order_by('time__time').last().value >= Individual.load().goal
-
-    records['weight'] = Weight.objects.order_by('value').first() if wants_to_lose else Weight.objects.order_by('value').last()
+    if Weight.objects.count() > 0 and Individual.load().goal:
+        wants_to_lose = Weight.objects.order_by('time__time').last().value >= Individual.load().goal
+        records['weight'] = Weight.objects.order_by('value').first() if wants_to_lose else Weight.objects.order_by('value').last()
 
     return records
