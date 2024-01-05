@@ -1,5 +1,6 @@
-Django~=4.1
-django-crispy-forms~=1.14.0
-crispy-bootstrap5
-scipy~=1.9.0
-python-decouple
+Django==5.0.1
+django-crispy-forms==2.1
+django-htmx==1.17.2
+crispy-bootstrap5==2023.10
+scipy==1.11.4
+python-decouple==3.8
